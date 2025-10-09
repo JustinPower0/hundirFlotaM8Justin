@@ -14,16 +14,20 @@ def crearMatriz(dim):
         matriz.append(fila)
     return matriz
 
+def agregarMatrizPartida(partida, dim, contador):
+    matriz = crearMatriz(dim)
+    partida[contador] = matriz
+    return contador + 1, matriz
 
 # Variable
 partida = {}
+matriz = []
+contador = 1
 barco1 = [1]
 barco2 = [2,2]
 barco3 = [3,3,3]
 barco4 = [4,4,4,4]
 barco5 = [5,5,5,5,5]
-dimencion = 7
-matriz = crearMatriz(dimencion)
 
 # Crear la aplicación
 app = FastAPI(title="Mi Projecto", version="0.0.1")
@@ -44,10 +48,10 @@ app.add_middleware(
 )
 
 # Funciones FastApi
-@app.get("/matriz")
-def read_root():
-    return matriz
-
-@app.get("/saludo/{nombre}")
-def read_item(nombre: str):
-    return {"saludo": f"Hola {nombre}!"}
+@app.get("/matriz/{dim}")
+def devolver_matriz(dim: int):
+    global partida,contador
+    if dim < 7 or dim > 20:
+        return {"error": "Dimensión inválida, debe estar entre 7 y 20"}
+    contador, matriz = agregarMatrizPartida(partida, dim, contador)
+    return {"id": contador - 1, "matriz": matriz}
