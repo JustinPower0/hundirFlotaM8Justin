@@ -51,7 +51,5 @@ app.add_middleware(
 @app.get("/partida/{dim}", tags=["Partida"])
 def devolver_matriz(dim: int):
     global partida,contador
-    if dim < 7 or dim > 20:
-        return {"error": "Dimensión inválida, debe estar entre 7 y 20"}
     contador, matriz = agregarMatrizPartida(partida, dim, contador)
     return {"id": contador - 1, "matriz": matriz}
