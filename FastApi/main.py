@@ -23,11 +23,11 @@ def agregarMatrizPartida(partida, dim, contador):
 partida = {}
 matriz = []
 contador = 1
-barco1 = [1]
-barco2 = [2,2]
-barco3 = [3,3,3]
-barco4 = [4,4,4,4]
-barco5 = [5,5,5,5,5]
+submari = [1]
+destructor = [2,2]
+creuer = [3,3,3]
+cuirassat = [4,4,4,4]
+portaavions = [5,5,5,5,5]
 
 # Crear la aplicación
 app = FastAPI(title="Mi Projecto", version="0.0.1")
