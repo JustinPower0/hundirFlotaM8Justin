@@ -72,11 +72,6 @@ def agregarbarcos(partida, partida_id):
 partida = {}
 matriz = []
 contador = 1
-submari = [1]
-destructor = [2,2]
-creuer = [3,3,3]
-cuirassat = [4,4,4,4]
-portaavions = [5,5,5,5,5]
 
 # Crear la aplicación
 app = FastAPI(title="Mi Projecto", version="0.0.1")
