@@ -3,8 +3,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 import random
+
+# Variable
+partida = {}
+matriz = []
+contador = 1
+barcos_definicion = {
+    "submari": {"id": 1, "longitud": 1},
+    "destructor": {"id": 2, "longitud": 2},
+    "creuer": {"id": 3, "longitud": 3},
+    "cuirassat": {"id": 4, "longitud": 4},
+    "portaavions": {"id": 5, "longitud": 5}
+}
+
+
 # Funciones Normales
 
+# Funcion Crear Matriz
 def crearMatriz(dim):
     matriz = []
     for i in range(dim):
@@ -14,41 +29,31 @@ def crearMatriz(dim):
         matriz.append(fila)
     return matriz
 
+# Funcion Agrergar Matriz Partida
 def agregarMatrizPartida(partida, dim, contador):
     matriz = crearMatriz(dim)
     partida[contador] = matriz
     return contador + 1, matriz
 
+# Funcion Agregar Barcos
 def agregarbarcos(partida, partida_id):
     matriz = partida.get(partida_id)
     if matriz is None:
         return {"error": "Partida no encontrada"}
 
     dim = len(matriz)
+    total_casillas = dim * dim
+    limite_ocupacion = int(total_casillas * 0.3)
+
     barcos = {}
-    nombres = {
-        1: "submari",
-        2: "destructor",
-        3: "creuer",
-        4: "cuirassat",
-        5: "portaavions"
-    }
+    estado = {"ocupadas": 0}
 
-    barcos_lista = [
-        [1],             # submari
-        [2, 2],          # destructor
-        [3, 3, 3],       # creuer
-        [4, 4, 4, 4],    # cuirassat
-        [5, 5, 5, 5, 5]  # portaavions
-    ]
-
-    for barco in barcos_lista:
-        tipo = barco[0]
-        nombre = nombres[tipo]
-        longitud = len(barco)
-        colocado = False
-
-        while not colocado:
+    def colocar_barco(nombre, info):
+        tipo = info["id"]
+        longitud = info["longitud"]
+        intentos = 0
+        continuar = False
+        while intentos < 100:
             orientacion = random.choice(["horizontal", "vertical"])
             if orientacion == "horizontal":
                 fila = random.randint(0, dim - 1)
@@ -58,20 +63,33 @@ def agregarbarcos(partida, partida_id):
                 fila = random.randint(0, dim - longitud)
                 col = random.randint(0, dim - 1)
                 posiciones = [(fila + i, col) for i in range(longitud)]
-
-            # Verificar que no hay solapamientos
-            if all(matriz[x][y] == 0 for x, y in posiciones):
+            libre = True
+            for x, y in posiciones:
+                if matriz[x][y] != 0:
+                    libre = False
+                    break
+            if libre:
                 for x, y in posiciones:
                     matriz[x][y] = tipo
-                barcos[nombre] = posiciones
-                colocado = True
+                barcos.setdefault(nombre, []).extend(posiciones)
+                estado["ocupadas"] += longitud
+                continuar = True
+                break
+            intentos += 1
+        return continuar
+
+    for nombre, info in barcos_definicion.items():
+        colocado = colocar_barco(nombre, info)
+        if not colocado:
+            return {"error": f"No se pudo colocar el barco {nombre}"}
+
+    while estado["ocupadas"] < limite_ocupacion:
+        nombre, info = random.choice(list(barcos_definicion.items()))
+        if estado["ocupadas"] + info["longitud"] > limite_ocupacion:
+            break
+        colocar_barco(nombre, info)
 
     return {"matriz": matriz, "barcos": barcos}
-
-# Variable
-partida = {}
-matriz = []
-contador = 1
 
 # Crear la aplicación
 app = FastAPI(title="Mi Projecto", version="0.0.1")
