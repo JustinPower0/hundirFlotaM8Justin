@@ -5,6 +5,39 @@
     gap: 8px; /* espacio entre los elementos */
   }
 
-  #tablero tr{
-    height: 30px;
-  }
+  #tablero {
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+#tablero td {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #ccc;
+  text-align: center;
+  background-color: #f0f0f0;
+}
+
+.oculto {
+  background-color: #f0f0f0;
+  color: transparent;
+}
+
+.agua {
+  background-color: #87CEFA;
+  color: #004080;
+}
+
+.impacto {
+  background-color: #DC143C;
+  color: white;
+}
+
+.desactivada {
+  pointer-events: none;
+}
+
+input.error {
+    border: 2px solid red;
+    background-color: #ffe6e6;
+}
