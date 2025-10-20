@@ -140,6 +140,21 @@ def leerEstadisticas():
     with open("../data/stats.json", "r") as archivo:
         datos = json.load(archivo)
         return datos
+
+@app.get("/tocados/{partida_id}/{x}/{y}")
+def tocado(partida_id : str, x : int, y: int):
+    matriz = partida.get(partida_id)
+    if matriz is None:
+        return{"error" : "No hay matriz"}
+    
+    if x < 0 or x >= len(matriz) or y < 0 or y >= len(matriz[0]):
+        return{"error": "Cordenadas fuera de matriz"}
+    
+    valor = matriz[x][y]
+    if valor == 0:
+        return {"resultado": "Agua"}
+    else:
+        return{"resultado" : "impacto", "tipo_barco" : valor}
     
 @app.get("/estado_juego",tags=["Estado_Juego"])
 def estado_juego():

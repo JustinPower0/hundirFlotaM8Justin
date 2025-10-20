@@ -3,37 +3,69 @@ let guardar = document.getElementById("guardar");
 let estadisticas = document.getElementById("estadisticas");
 let estado_juego = document.getElementById("estado_juego");
 
-
 const puntuacion_Base = 1000;
 const disparar = 10;
 const bonus_tocar = 20;
 const bonus_Hundir_Barco = 50;
 const penalizacion_Segundo = 1;
 
+guardar.addEventListener("click", (event) => {
+    event.preventDefault()
+    const nombre = document.getElementById("nombre").value
+    const ampliada = document.getElementById("ampliada").value
+    const altura = document.getElementById("altura").value
+    if (nombre == "" || ampliada == "" || altura == "") {
 
-tabla.addEventListener("click", (event) => {
-    event.preventDefault();
-    let dimencion = parseInt(prompt("Introduzca una dimencion max 7"))
-    fetch("http://127.0.0.1:8000/barcos/" + dimencion)
-        .then(response => response.json())
-        .then(data => {
-            console.table(data);
-        })
-        .catch(error => console.error('Error:', error));
-    // if (isNaN(dimencion) || dimencion < 7 || dimencion > 20) {
-    //     alert("Introduce una dimencion entre 20 y 7")
-    // } else {
-    // }
+    }
+    else {
+        fetch(`http://127.0.0.1:8000/partida/${ampliada}/${altura}/${nombre}`)
+            .then(response => response.json())
+            .then(data => {
+                const partidaID = data.id
+
+                fetch(`http://127.0.0.1:8000/barcos/${partidaID}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        crearTabla(data.matriz)
+                    })
+                tablero.addEventListener("click", event => {
+                    const celda = event.target;
+                    if (celda.tagName !== "TD") return
+
+                    const x = celda.getAttribute("data-x")
+                    const y = celda.getAttribute("data-y")
+
+                    fetch(`http://127.0.0.1:8000/tocados/${partidaID}/${x}/${y}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            celda.classList.remove("oculto")
+                            celda.setAttribute("class", celda.className + " desactivada")
+
+                            if (data.resultado === "Agua") {
+                                celda.setAttribute("class", "agua")
+                                celda.textContent = "O"
+                            } else if (data.resultado === "impacto") {
+                                celda.setAttribute("class", "impacto")
+                                celda.textContent = "X"
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Error al disparar:", err)
+                        });
+                })
+            })
+    }
+
 })
 
 estadisticas.addEventListener("click", (event) => {
     event.preventDefault();
     fetch("http://127.0.0.1:8000/estadisticas")
-        .then(response => response.json())                 //fetch para tener las estadisticas
+        .then(response => response.json())
         .then(data => {
             console.table(data);
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error('Error:', error))
 })
 
 
@@ -46,26 +78,27 @@ document.addEventListener("DOMContentLoaded", () => {
         .catch(error => console.error('Error:', error));
 });
 
-
-
 function crearTabla(matriz) {
-    const tbody = document.getElementById("#tablero tbody");
-    tbody.innerHTML = "";
-    let celdas = ""
-    let dimX = 6, dimY = 5;
+    const tablero = document.querySelector("#tablero tbody")
+    tablero.innerHTML = ""
 
     for (let i = 0; i < matriz.length; i++) {
-        const fila = document.createElement("tr");
+        const fila = document.createElement("tr")
+
         for (let j = 0; j < matriz[i].length; j++) {
-            const celda = document.createElement("td");
-            celda.setAttribute(i);
-            celda.setAttribute(j);
-            fila.appendChild(celda);
+            const celda = document.createElement("td")
+            celda.textContent = matriz[i][j]
+
+            celda.setAttribute("data-x", i)
+            celda.setAttribute("data-y", j)
+            celda.setAttribute("data-valor", matriz[i][j])
+            celda.setAttribute("class", "oculto")
+            celda.textContent = ""
+            fila.appendChild(celda)
         }
-        tbody.appendChild(fila);
+
+        tablero.appendChild(fila)
     }
-    document.getElementById("tablero").innerHTML = celdas;
-}
 
 
 function calcularPuntuacio(joc) {
@@ -90,4 +123,4 @@ function calcularPuntuacio(joc) {
 
     return puntuacio;
 }
-
+}
