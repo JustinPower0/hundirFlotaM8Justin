@@ -140,3 +140,9 @@ def leerEstadisticas():
     with open("../data/stats.json", "r") as archivo:
         datos = json.load(archivo)
         return datos
+    
+@app.get("/estado_juego",tags=["Estado_Juego"])
+def estado_juego():
+        with open("../data/games/game_id.json","r") as archivos:
+            dato=json.load(archivos)
+            return dato
