@@ -8,7 +8,7 @@ let dificultadSeleccionada = "medium"; // valor por defecto
 
 const marcador = document.createElement("div");
 marcador.setAttribute("id", "puntos");
-marcador.textContent = "Punts: 0";
+marcador.appendChild(document.createTextNode("Punts: 0"));
 document.body.appendChild(marcador);
 
 guardar.addEventListener("click", (event) => {
@@ -24,23 +24,16 @@ guardar.addEventListener("click", (event) => {
     .then(response => response.json())
     .then(data => {
       partidaID = data.id;
-      const matriz = data.matriz;
-      crearTabla(matriz);
+      crearTabla(data.matriz);
 
-      while (marcador.firstChild) marcador.removeChild(marcador.firstChild);
-      const textoInicio = document.createTextNode(`Punts: ${data.puntuacion}`);
-      marcador.appendChild(textoInicio);
-      actualizarColor(data.puntuacion);
+      actualizarMarcador(data.puntuacion);
 
       if (intervaloPuntuacion) clearInterval(intervaloPuntuacion);
       intervaloPuntuacion = setInterval(() => {
         fetch(`http://127.0.0.1:8000/puntuacio_actual/${partidaID}`)
           .then(res => res.json())
           .then(data => {
-            while (marcador.firstChild) marcador.removeChild(marcador.firstChild);
-            const nuevoTexto = document.createTextNode(`Punts: ${data.puntuacion}`);
-            marcador.appendChild(nuevoTexto);
-            actualizarColor(data.puntuacion);
+            actualizarMarcador(data.puntuacion);
           });
       }, 1000);
     });
@@ -61,10 +54,7 @@ tabla.addEventListener("click", event => {
       celda.classList.remove("oculto");
       celda.setAttribute("data-activa", "false");
 
-      while (marcador.firstChild) marcador.removeChild(marcador.firstChild);
-      const nuevoTexto = document.createTextNode(`Punts: ${data.puntuacion}`);
-      marcador.appendChild(nuevoTexto);
-      actualizarColor(data.puntuacion);
+      actualizarMarcador(data.puntuacion);
 
       if (data.resultado === "Agua") {
         celda.setAttribute("class", "agua");
@@ -91,16 +81,7 @@ tabla.addEventListener("click", event => {
         fetch(`http://127.0.0.1:8000/estado_juego/${partidaID}`)
           .then(res => res.json())
           .then(info => {
-            estado_juego.innerHTML = `
-              <h4>Partida ${info.estat}</h4>
-              <p>Jugador: ${info.jugador}</p>
-              <p>Dificultat: ${dificultadSeleccionada}</p>
-              <p>Puntuació: ${info.puntuacio}</p>
-              <p>Vaixells enfonsats: ${info.vaixells_enfonsats} / ${info.vaixells_totals}</p>
-              <p>Caselles destapades: ${info.caselles_destapades}</p>
-              <p>Inici: ${info.data_inici}</p>
-              <p>Fi: ${info.data_fi}</p>
-            `;
+            mostrarEstadoFinal(info);
             document.querySelectorAll("#tablero td").forEach(celda => {
               celda.setAttribute("data-activa", "false");
             });
@@ -116,18 +97,34 @@ estadisticas.addEventListener("click", (event) => {
   fetch("http://127.0.0.1:8000/estadisticas")
     .then(response => response.json())
     .then(data => {
-      estado_juego.innerHTML = `
-        <h4>Estadístiques globals</h4>
-        <p>Total partides: ${data.total_partides}</p>
-        <p>Millor puntuació: ${data.millor_puntuacio} (${data.millor_jugador})</p>
-        <p>Data millor: ${data.data_millor}</p>
-        <h5>Rànquing Top 5:</h5>
-        <ol>
-          ${data.rànquing_top5.map(p =>
-            `<li>${p.jugador} - ${p.puntuacio} punts (${p.files}x${p.columnes})</li>`
-          ).join("")}
-        </ol>
-      `;
+      estado_juego.innerHTML = "";
+      const titulo = document.createElement("h4");
+      titulo.appendChild(document.createTextNode("Estadístiques globals"));
+      estado_juego.appendChild(titulo);
+
+      const datos = [
+        [`Total partides:`, data.total_partides],
+        [`Millor puntuació:`, `${data.millor_puntuacio} (${data.millor_jugador})`],
+        [`Data millor:`, data.data_millor]
+      ];
+
+      datos.forEach(([label, valor]) => {
+        const p = document.createElement("p");
+        p.appendChild(document.createTextNode(`${label} ${valor}`));
+        estado_juego.appendChild(p);
+      });
+
+      const subtitulo = document.createElement("h5");
+      subtitulo.appendChild(document.createTextNode("Rànquing:"));
+      estado_juego.appendChild(subtitulo);
+
+      const lista = document.createElement("ol");
+      data.rànquing_top5.forEach(p => {
+        const li = document.createElement("li");
+        li.appendChild(document.createTextNode(`${p.jugador} - ${p.puntuacio} punts (${p.files}x${p.columnes})`));
+        lista.appendChild(li);
+      });
+      estado_juego.appendChild(lista);
     })
     .catch(error => console.error("Error al obtener estadísticas:", error));
 });
@@ -138,16 +135,26 @@ document.getElementById("ver_estado").addEventListener("click", () => {
   fetch(`http://127.0.0.1:8000/estado_juego/${partidaID}`)
     .then(res => res.json())
     .then(data => {
-      estado_juego.innerHTML = `
-        <h4>Estat de la partida</h4>
-        <p>Jugador: ${data.jugador}</p>
-        <p>Estat: ${data.estat}</p>
-        <p>Dificultat: ${dificultadSeleccionada}</p>
-        <p>Vaixells enfonsats: ${data.vaixells_enfonsats} / ${data.vaixells_totals}</p>
-        <p>Caselles destapades: ${data.caselles_destapades}</p>
-        <p>Inici: ${data.data_inici}</p>
-        <p>Fi: ${data.data_fi || "En curs..."}</p>
-      `;
+      estado_juego.innerHTML = "";
+      const titulo = document.createElement("h4");
+      titulo.appendChild(document.createTextNode("Estat de la partida"));
+      estado_juego.appendChild(titulo);
+
+      const datos = [
+        [`Jugador:`, data.jugador],
+        [`Estat:`, data.estat],
+        [`Dificultat:`, dificultadSeleccionada],
+        [`Vaixells enfonsats:`, `${data.vaixells_enfonsats} / ${data.vaixells_totals}`],
+        [`Caselles destapades:`, data.caselles_destapades],
+        [`Inici:`, data.data_inici],
+        [`Fi:`, data.data_fi || "En curs..."]
+      ];
+
+      datos.forEach(([label, valor]) => {
+        const p = document.createElement("p");
+        p.appendChild(document.createTextNode(`${label} ${valor}`));
+        estado_juego.appendChild(p);
+      });
     })
     .catch(error => console.error("Error al obtener estado de juego:", error));
 });
@@ -159,15 +166,25 @@ document.querySelector(".btn.rojo").addEventListener("click", () => {
   fetch(`http://127.0.0.1:8000/abandonar/${partidaID}`)
     .then(res => res.json())
     .then(data => {
-      estado_juego.innerHTML = `
-        <h4>Partida abandonada</h4>
-        <p>Jugador: ${data.jugador}</p>
-        <p>Estat: ${data.estat}</p>
-        <p>Dificultat: ${dificultadSeleccionada}</p>
-        <p>Puntuació: ${data.puntuacio}</p>
-        <p>Vaixells enfonsats: ${data.vaixells_enfonsats}</p>
-        <p>Caselles destapades: ${data.caselles_destapades}</p>
-      `;
+      estado_juego.innerHTML = "";
+      const titulo = document.createElement("h4");
+      titulo.appendChild(document.createTextNode("Partida abandonada"));
+      estado_juego.appendChild(titulo);
+
+      const datos = [
+        [`Jugador:`, data.jugador],
+        [`Estat:`, data.estat],
+        [`Dificultat:`, dificultadSeleccionada],
+        [`Puntuació:`, data.puntuacio],
+        [`Vaixells enfonsats:`, data.vaixells_enfonsats],
+        [`Caselles destapades:`, data.caselles_destapades]
+      ];
+
+      datos.forEach(([label, valor]) => {
+        const p = document.createElement("p");
+        p.appendChild(document.createTextNode(`${label} ${valor}`));
+        estado_juego.appendChild(p);
+      });
     });
 });
 
@@ -194,20 +211,46 @@ function crearTabla(matriz) {
   }
 }
 
+function actualizarMarcador(puntuacion) {
+  while (marcador.firstChild) marcador.removeChild(marcador.firstChild);
+  marcador.appendChild(document.createTextNode(`Punts: ${puntuacion}`));
+  actualizarColor(puntuacion);
+}
+
 function actualizarColor(puntuacion) {
-  if (dificultadSeleccionada === "easy") {
-    marcador.style.border = "3px solid #3498db"; // azul
-  } else if (dificultadSeleccionada === "hard") {
-    marcador.style.border = "3px solid #e67e22"; // naranja
-  } else {
-    marcador.style.border = "3px solid #95a5a6"; // gris
-  }
+  marcador.classList.remove("easy", "medium", "hard", "baja", "media", "alta");
+
+  marcador.classList.add(dificultadSeleccionada);
 
   if (puntuacion >= 500) {
-    marcador.style.backgroundColor = "#2ecc71";
+    marcador.classList.add("alta");
   } else if (puntuacion >= 200) {
-    marcador.style.backgroundColor = "#f1c40f";
+    marcador.classList.add("media");
   } else {
-    marcador.style.backgroundColor = "#e74c3c";
+    marcador.classList.add("baja");
   }
+}
+
+function mostrarEstadoFinal(info) {
+  estado_juego.innerHTML = "";
+
+  const titulo = document.createElement("h4");
+  titulo.appendChild(document.createTextNode(`Partida ${info.estat}`));
+  estado_juego.appendChild(titulo);
+
+  const datos = [
+    ["Jugador:", info.jugador],
+    ["Dificultat:", dificultadSeleccionada],
+    ["Puntuació:", info.puntuacio],
+    ["Vaixells enfonsats:", `${info.vaixells_enfonsats} / ${info.vaixells_totals}`],
+    ["Caselles destapades:", info.caselles_destapades],
+    ["Inici:", info.data_inici],
+    ["Fi:", info.data_fi]
+  ];
+
+  datos.forEach(([label, valor]) => {
+    const p = document.createElement("p");
+    p.appendChild(document.createTextNode(`${label} ${valor}`));
+    estado_juego.appendChild(p);
+  });
 }
