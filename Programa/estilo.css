@@ -1,4 +1,4 @@
-/* ==== RESET GENERAL ==== */
+/* RESET GENERAL  */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -14,7 +14,7 @@ body {
   padding: 20px;
 }
 
-/* ==== ESTRUCTURA PRINCIPAL ==== */
+/*  ESTRUCTURA PRINCIPAL  */
 .layout {
   display: grid;
   grid-template-columns: 260px 1fr 260px;
@@ -28,7 +28,7 @@ body {
 .tablero-contenedor { grid-area: tablero; }
 .container { grid-area: marcador; }
 
-/* ==== BLOQUE 1: FORMULARIO ==== */
+/* BLOQUE 1: FORMULARIO */
 #formulario {
   background: white;
   padding: 20px;
@@ -111,7 +111,7 @@ input[type="text"] {
   display: block;
 }
 
-/* ==== BLOQUE 2: TABLERO ==== */
+/*  BLOQUE 2: TABLERO  */
 .tablero-contenedor {
   background: white;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -156,7 +156,7 @@ input[type="text"] {
   font-weight: bold;
 }
 
-/* ==== BLOQUE 3: ESTADÍSTICAS ==== */
+/*BLOQUE 3: ESTADÍSTICAS  */
 .container {
   background: white;
   padding: 25px;
@@ -193,7 +193,7 @@ input[type="text"] {
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.05);
 }
 
-/* ==== RESPONSIVE: TABLET ==== */
+/*  RESPONSIVE: TABLET  */
 @media (min-width: 768px) and (max-width: 1024px) {
   .layout {
     grid-template-columns: 260px 1fr;
@@ -232,7 +232,7 @@ input[type="text"] {
   }
 }
 
-/* ==== RESPONSIVE: MÓVIL ==== */
+/*RESPONSIVE: MÓVIL  */
 @media (max-width: 767px) {
   .layout {
     grid-template-columns: 1fr;
