@@ -61,7 +61,9 @@ guardar.addEventListener("click", (event) => {
     });
 });
 
-tabla.addEventListener("click", event => {
+tabla.addEventListener("click", (event) => {
+  event.preventDefault();
+  event.stopPropagation();
   const celda = event.target;
   if (celda.tagName !== "TD") return;
   if (celda.classList.contains("agua") || celda.classList.contains("impacto") || celda.classList.contains("hundido")) return;
@@ -184,7 +186,9 @@ document.getElementById("ver_estado").addEventListener("click", () => {
     .catch(error => console.error("Error al obtener estado de juego:", error));
 });
 
-document.querySelector(".btn.rojo").addEventListener("click", () => {
+document.querySelector(".btn.rojo").addEventListener("click", (event) => {
+  event.preventDefault();
+  event.stopPropagation();
   if (!partidaID) return alert("No hi ha partida activa");
 
   clearInterval(intervaloPuntuacion);
