@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   web:
     build: .
@@ -7,7 +6,7 @@ services:
     volumes:
       - ./public:/var/www/html
   db:
-    image: mysql:8ç
+    image: mysql:8
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: demo
