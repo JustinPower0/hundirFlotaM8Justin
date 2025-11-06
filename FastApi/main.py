@@ -238,12 +238,11 @@ origins = [
 
 #Cors
 app.add_middleware(
-    CORSMiddleware,
-     #allow_origins=["*"],  # permite cualquier origen (no recomendable en producción)
-    allow_origins=origins,  # permite solo esos orígenes
+   CORSMiddleware,
+    allow_origins=["*"],  # permite cualquier dominio (solo desarrollo)
     allow_credentials=True,
-    allow_methods=["*"],    # permite todos los métodos (GET, POST, etc.)
-    allow_headers=["*"],    # permite todas las cabeceras
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Funciones FastApi
