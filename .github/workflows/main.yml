@@ -1,5 +1,4 @@
 name: Docker + Ngrok v3 Demo
-
 on:
   workflow_dispatch:
   push:
@@ -11,10 +10,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Run Docker containers
         run: docker compose up -d
-
       - name: Install Ngrok v3
         run: |
           curl -sLo ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip
@@ -22,10 +19,8 @@ jobs:
           sudo mv ngrok /usr/local/bin/
           sudo chmod +x /usr/local/bin/ngrok
           ngrok version
-
       - name: Authenticate Ngrok
         run: ngrok config add-authtoken ${{ secrets.NGROK_AUTHTOKEN }}
-
       - name: Start Ngrok tunnel
         id: ngrok
         run: |
@@ -35,7 +30,6 @@ jobs:
           echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
           echo "::notice title=URL pública::$NGROK_URL"
           tail -f ngrok.log & wait
-
       - name: Stop Docker containers
         if: always()
         run: docker compose down
