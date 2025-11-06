@@ -4,4 +4,4 @@ FROM php:8.2-apache
 RUN docker-php-ext-install pdo pdo_mysql
 
 # Copiar tu sitio a la carpeta pública de Apache
-COPY ./frontend/public /var/www/html/
+COPY ./Programa/public /var/www/html/
