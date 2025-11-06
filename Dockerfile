@@ -1,7 +1,12 @@
 FROM php:8.2-apache
 
-# Instalar PDO MySQL
+# Instalar extensiones necesarias
 RUN docker-php-ext-install pdo pdo_mysql
 
-# Copiar tu sitio a la carpeta pública de Apache
+# Copiar los archivos del sitio web
 COPY ./Programa /var/www/html/
+
+# Dar permisos a Apache
+RUN chmod -R 755 /var/www/html
+
+# Apache ya se inicia automáticamente

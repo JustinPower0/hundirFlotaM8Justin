@@ -1,10 +1,13 @@
+version: '3'
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8080:80"
     volumes:
-      - ./public:/var/www/html
+      - ./Programa:/var/www/html
   db:
     image: mysql:8
     environment:
