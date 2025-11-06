@@ -18,7 +18,6 @@ barcos_definicion = {
 }
 
 # Funciones Normales
-
 # Funcion Crear Matriz
 def crearMatriz(filas,columnas):
     matriz = []
