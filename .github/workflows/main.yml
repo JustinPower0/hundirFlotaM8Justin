@@ -20,7 +20,7 @@ jobs:
           sudo chmod +x /usr/local/bin/ngrok
           ngrok version
       - name: Authenticate Ngrok
-        run: ngrok config add-authtoken ${{ secrets.NGROK_AUTHTOKEN }}
+        run: ngrok config add-authtoken ${{secrets.NGROK_AUTHTOKEN}}
       - name: Start Ngrok tunnel
         id: ngrok
         run: |
