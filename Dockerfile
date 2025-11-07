@@ -1,15 +1,12 @@
-FROM python:3.11
+FROM php:8.2-apache
 
-WORKDIR /app
+# Instalar extensiones necesarias
+RUN docker-php-ext-install pdo pdo_mysql
 
-# Copia todo el proyecto
-COPY . /app
+# Copiar los archivos del sitio web
+COPY ./Programa /var/www/html/
 
-# Instala dependencias
-RUN pip install --no-cache-dir fastapi uvicorn
+# Dar permisos a Apache
+RUN chmod -R 755 /var/www/html
 
-# Expone el puerto 8080
-EXPOSE 8080
-
-# Arranca FastAPI automáticamente
-CMD ["uvicorn", "FastApi.main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Apache ya se inicia automáticamente
