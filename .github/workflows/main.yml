@@ -1,4 +1,4 @@
-name: Despliegue Hundir la Flota (Docker + Ngrok)
+name: Docker + Ngrok (FastAPI)
 
 on:
   workflow_dispatch:
@@ -9,36 +9,31 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout del repositorio
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Levantar contenedores Docker
-        run: docker compose up -d --build
+      - name: Run Docker
+        run: docker compose up -d
 
-      - name: Instalar Ngrok v3
+      - name: Install Ngrok
         run: |
           curl -sLo ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip
           unzip -o ngrok.zip
           sudo mv ngrok /usr/local/bin/
           sudo chmod +x /usr/local/bin/ngrok
-          ngrok version
-
-      - name: Autenticar Ngrok
+      - name: Auth Ngrok
         run: ngrok config add-authtoken ${{ secrets.NGROK_AUTHTOKEN }}
 
-      - name: Iniciar túnel Ngrok al puerto 8080 (10 minutos)
+      - name: Start Ngrok tunnel (10 min)
         id: ngrok
         run: |
-          ngrok http http://localhost:8080 --log=stdout > ngrok.log &
+          ngrok http 8080 --log=stdout > ngrok.log &
           sleep 5
           NGROK_URL=$(curl --silent http://127.0.0.1:4040/api/tunnels | grep -oP '"public_url":"\Khttps://[^"]+')
-          echo "::notice title=URL pública::$NGROK_URL"
-          echo "El túnel permanecerá activo durante 10 minutos..."
-          sleep 600
-          echo "Tiempo finalizado. Cerrando túnel y contenedores..."
-
-      - name: Detener contenedores Docker
-        if: always()
-        run: docker compose down
+          echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
+          echo "::notice title=Ngrok URL::$NGROK_URL"
+          echo "Esperando 10 minutos..."
+          sleep 600  # 10 minutos
+          echo "Cerrando Ngrok y contenedor..."
+          docker compose down
