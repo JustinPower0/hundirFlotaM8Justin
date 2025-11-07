@@ -232,7 +232,7 @@ def volcarPartidaFinalizada(partida_id: str):
 # Crear la aplicación
 app = FastAPI(title="Mi Projecto", version="0.0.1")
 
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+app.mount("/", StaticFiles(directory="FastApi/static", html=True), name="static")
 # Lista de orígenes permitidos
 origins = [
     "http://localhost:5500",  # si tu frontend corre aquí
