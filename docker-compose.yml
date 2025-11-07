@@ -1,17 +1,10 @@
 version: '3'
 services:
-  web:
+  backend:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:80"
+      - "8080:8080"
     volumes:
-      - ./Programa:/var/www/html
-  db:
-    image: mysql:8
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: demo
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      - .:/app

@@ -1,4 +1,4 @@
-name: Docker + Ngrok v3 Demo
+name: Docker + Ngrok FastAPI
 on:
   workflow_dispatch:
   push:
@@ -8,20 +8,20 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
-      - name: Run Docker containers
-        run: docker compose up -d
-      - name: Install Ngrok v3
+      - name: Build and run container
+        run: docker compose up -d --build
+      - name: Install Ngrok
         run: |
           curl -sLo ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip
           unzip -o ngrok.zip
           sudo mv ngrok /usr/local/bin/
-          sudo chmod +x /usr/local/bin/ngrok
           ngrok version
-      - name: Authenticate Ngrok
+      - name: Auth Ngrok
         run: ngrok config add-authtoken ${{secrets.NGROK_AUTHTOKEN}}
-      - name: Start Ngrok tunnel
+
+      - name: Start tunnel to backend
         id: ngrok
         run: |
           ngrok http 8080 --log=stdout > ngrok.log &
@@ -30,6 +30,3 @@ jobs:
           echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
           echo "::notice title=URL pública::$NGROK_URL"
           tail -f ngrok.log & wait
-      - name: Stop Docker containers
-        if: always()
-        run: docker compose down
