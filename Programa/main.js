@@ -7,10 +7,6 @@ let intervaloPuntuacion = null;
 let dificultadSeleccionada = "medium";
 let marcador = document.querySelector(".score");
 
-// ⚙️ Usa el dominio del túnel Ngrok
-const API_URL = "https://TU_URL_NGROK_AQUI"; // ej: https://abcd1234.ngrok.io
-
-
 guardar.addEventListener("click", (event) => {
   event.preventDefault();
 
@@ -41,14 +37,14 @@ guardar.addEventListener("click", (event) => {
   const avisoExistente = document.getElementById("aviso_campos");
   if (avisoExistente) avisoExistente.remove();
 
-  fetch(`${API_URL}/iniciar/${ampliada.value}/${altura.value}/${nombre.value}/${dificultadSeleccionada}`)
+  fetch(`http://127.0.0.1:8000/iniciar/${ampliada.value}/${altura.value}/${nombre.value}/${dificultadSeleccionada}`)
     .then(response => response.json())
     .then(data => {
       partidaID = data.id;
       crearTabla(data.matriz);
       actualizarMarcador(data.puntuacion);
 
-      fetch(`${API_URL}/estado_juego/${partidaID}`)
+      fetch(`http://127.0.0.1:8000/estado_juego/${partidaID}`)
         .then(res => res.json())
         .then(info => {
           actualizarEstadisticasVisuales(info);
@@ -56,7 +52,7 @@ guardar.addEventListener("click", (event) => {
 
       if (intervaloPuntuacion) clearInterval(intervaloPuntuacion);
       intervaloPuntuacion = setInterval(() => {
-        fetch(`${API_URL}/puntuacio_actual/${partidaID}`)
+        fetch(`http://127.0.0.1:8000/puntuacio_actual/${partidaID}`)
           .then(res => res.json())
           .then(data => {
             actualizarMarcador(data.puntuacion);
@@ -76,7 +72,7 @@ tabla.addEventListener("click", (event) => {
   const y = celda.getAttribute("data-y");
   if (!partidaID) return;
 
-  fetch(`${API_URL}/tocados/${partidaID}/${x}/${y}`)
+  fetch(`http://127.0.0.1:8000/tocados/${partidaID}/${x}/${y}`)
     .then(res => res.json())
     .then(data => {
       celda.classList.remove("oculto");
@@ -105,7 +101,7 @@ tabla.addEventListener("click", (event) => {
       }
 
       // 🔁 Actualizar estadísticas visuales en tiempo real
-      fetch(`${API_URL}/estado_juego/${partidaID}`)
+      fetch(`http://127.0.0.1:8000/estado_juego/${partidaID}`)
         .then(res => res.json())
         .then(info => {
           actualizarEstadisticasVisuales(info); // ← actualiza el div .container
@@ -125,8 +121,7 @@ tabla.addEventListener("click", (event) => {
 
 estadisticas.addEventListener("click", (event) => {
   event.preventDefault();
-  
-  fetch("`${API_URL}/estadisticas")
+  fetch("http://127.0.0.1:8000/estadisticas")
     .then(response => response.json())
     .then(data => {
       // Rellenar estadísticas globales
@@ -151,7 +146,7 @@ estadisticas.addEventListener("click", (event) => {
 document.getElementById("ver_estado").addEventListener("click", () => {
   if (!partidaID) return alert("No hi ha partida activa");
 
-  fetch(`${API_URL}/estado_juego/${partidaID}`)
+  fetch(`http://127.0.0.1:8000/estado_juego/${partidaID}`)
     .then(res => res.json())
     .then(data => {
       estado_juego.innerHTML = "";
@@ -184,7 +179,7 @@ document.querySelector(".btn.rojo").addEventListener("click", (event) => {
   if (!partidaID) return alert("No hi ha partida activa");
 
   clearInterval(intervaloPuntuacion);
-  fetch(`${API_URL}/abandonar/${partidaID}`)
+  fetch(`http://127.0.0.1:8000/abandonar/${partidaID}`)
     .then(res => res.json())
     .then(data => {
       estado_juego.innerHTML = "";
