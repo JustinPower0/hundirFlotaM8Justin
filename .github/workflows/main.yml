@@ -1,25 +1,31 @@
 name: Docker + Ngrok v3 Demo
+
 on:
   workflow_dispatch:
   push:
     branches:
       - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Build and run Docker containers
         run: docker compose up -d --build
-      - name: Wait for FastAPI to be ready
+
+      - name: Wait for FastAPI to be ready inside container
         run: |
-          echo "Esperando a que FastAPI arranque..."
-          until curl --silent http://127.0.0.1:8080; do
+          CONTAINER_ID=$(docker ps -q -f "name=web")
+          echo "Esperando a que FastAPI arranque en el contenedor $CONTAINER_ID..."
+          until docker exec $CONTAINER_ID curl --silent http://127.0.0.1:8000; do
             echo "FastAPI no listo, esperando 2s..."
             sleep 2
           done
-          echo "FastAPI listo en http://127.0.0.1:8080"
+          echo "FastAPI listo dentro del contenedor"
+
       - name: Install Ngrok v3
         run: |
           curl -sLo ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip
@@ -27,8 +33,10 @@ jobs:
           sudo mv ngrok /usr/local/bin/
           sudo chmod +x /usr/local/bin/
           ngrok version
+
       - name: Authenticate Ngrok
         run: ngrok config add-authtoken ${{secrets.NGROK_AUTHTOKEN}}
+
       - name: Start Ngrok tunnel
         id: ngrok
         run: |
@@ -38,6 +46,7 @@ jobs:
           echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
           echo "::notice title=URL pública::$NGROK_URL"
           tail -f ngrok.log & wait
+
       - name: Stop Docker containers
         if: always()
         run: docker compose down
