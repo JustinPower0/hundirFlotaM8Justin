@@ -1,4 +1,5 @@
-name: Docker + Ngrok PHP Demo
+name: Docker + Ngrok FastAPI Demo
+
 on:
   workflow_dispatch:
   push:
@@ -8,11 +9,12 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Build and run containers
+      - name: Build and run container (FastAPI)
         run: docker compose up -d --build
 
       - name: Install Ngrok
@@ -28,12 +30,14 @@ jobs:
       - name: Start Ngrok (10 minutos)
         id: ngrok
         run: |
+          echo "Iniciando túnel hacia FastAPI en el puerto 8080..."
           ngrok http 8080 --log=stdout > ngrok.log &
           sleep 8
           NGROK_URL=$(curl --silent http://127.0.0.1:4040/api/tunnels | grep -oP '"public_url":"\Khttps://[^"]+')
           echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
           echo "::notice title=URL pública::$NGROK_URL"
-          sleep 600  # Mantiene activo 10 min
+          echo "Tu app está disponible temporalmente en: $NGROK_URL"
+          sleep 600  # Mantiene el túnel abierto 10 minutos
           pkill ngrok
 
       - name: Stop containers
