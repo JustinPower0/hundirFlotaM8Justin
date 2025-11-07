@@ -1,32 +1,41 @@
-name: Docker + Ngrok FastAPI
+name: Docker + Ngrok PHP Demo
 on:
   workflow_dispatch:
   push:
     branches:
       - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-      - name: Build and run container
+
+      - name: Build and run containers
         run: docker compose up -d --build
+
       - name: Install Ngrok
         run: |
           curl -sLo ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip
           unzip -o ngrok.zip
           sudo mv ngrok /usr/local/bin/
           ngrok version
-      - name: Auth Ngrok
-        run: ngrok config add-authtoken ${{secrets.NGROK_AUTHTOKEN}}
 
-      - name: Start tunnel to backend
+      - name: Auth Ngrok
+        run: ngrok config add-authtoken ${{ secrets.NGROK_AUTHTOKEN }}
+
+      - name: Start Ngrok (10 minutos)
         id: ngrok
         run: |
           ngrok http 8080 --log=stdout > ngrok.log &
-          sleep 5
+          sleep 8
           NGROK_URL=$(curl --silent http://127.0.0.1:4040/api/tunnels | grep -oP '"public_url":"\Khttps://[^"]+')
           echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
           echo "::notice title=URL pública::$NGROK_URL"
-          tail -f ngrok.log & wait
+          sleep 600  # Mantiene activo 10 min
+          pkill ngrok
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down
