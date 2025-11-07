@@ -10,14 +10,22 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Run Docker containers
-        run: docker compose up -d
+      - name: Build and run Docker containers
+        run: docker compose up -d --build
+      - name: Wait for FastAPI to be ready
+        run: |
+          echo "Esperando a que FastAPI arranque..."
+          until curl --silent http://127.0.0.1:8080; do
+            echo "FastAPI no listo, esperando 2s..."
+            sleep 2
+          done
+          echo "FastAPI listo en http://127.0.0.1:8080"
       - name: Install Ngrok v3
         run: |
           curl -sLo ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip
           unzip -o ngrok.zip
           sudo mv ngrok /usr/local/bin/
-          sudo chmod +x /usr/local/bin/ngrok
+          sudo chmod +x /usr/local/bin/
           ngrok version
       - name: Authenticate Ngrok
         run: ngrok config add-authtoken ${{secrets.NGROK_AUTHTOKEN}}
