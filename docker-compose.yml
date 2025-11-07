@@ -5,9 +5,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8000"
+      - "8080:8000"   # puerto del contenedor 8000 -> host 8080
     volumes:
-      - ./Programa:/var/www/html
+      - ./programas:/app/programas  # opcional para desarrollo de js/html
   db:
     image: mysql:8
     environment:

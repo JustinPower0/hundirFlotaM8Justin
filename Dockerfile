@@ -1,21 +1,18 @@
-# Imagen base oficial de Python
+# Imagen base de Python
 FROM python:3.12-slim
 
-# Establecer directorio de trabajo en el contenedor
+# Directorio de trabajo
 WORKDIR /app
 
-# Copiar requirements.txt y otros archivos necesarios
+# Copiar requirements e instalar dependencias
 COPY requirements.txt .
-
-# Instalar dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar toda la carpeta "programa" al contenedor
+# Copiar todo el proyecto al contenedor
 COPY . .
 
-
-# Exponer el puerto que usará FastAPI
+# Exponer el puerto que uvicorn usará
 EXPOSE 8000
 
-# Comando para ejecutar FastAPI con uvicorn
+# Ejecutar uvicorn
 CMD ["uvicorn", "fastapi.main:app", "--host", "0.0.0.0", "--port", "8000"]
