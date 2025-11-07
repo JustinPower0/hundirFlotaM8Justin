@@ -1,4 +1,5 @@
 name: Despliegue Hundir la Flota (Docker + Ngrok)
+
 on:
   workflow_dispatch:
   push:
@@ -30,7 +31,7 @@ jobs:
       - name: Iniciar túnel Ngrok al puerto 8080 (10 minutos)
         id: ngrok
         run: |
-          ngrok http 8080 --log=stdout > ngrok.log &
+          ngrok http http://localhost:8080 --log=stdout > ngrok.log &
           sleep 5
           NGROK_URL=$(curl --silent http://127.0.0.1:4040/api/tunnels | grep -oP '"public_url":"\Khttps://[^"]+')
           echo "::notice title=URL pública::$NGROK_URL"
