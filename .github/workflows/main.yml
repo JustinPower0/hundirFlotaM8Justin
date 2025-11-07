@@ -1,45 +1,50 @@
-name: Docker + Ngrok FastAPI Demo
-
+name: Docker + Ngrok v3 Demo
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Build and run container (FastAPI)
-        run: docker compose up -d --build
-
-      - name: Install Ngrok
+      - name: Build and run Docker containers
+        run: |
+          docker compose up -d --build
+          echo "Esperando que el servidor arranque..."
+          sleep 10
+          docker ps -a
+      - name: Install Ngrok v3
         run: |
           curl -sLo ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip
           unzip -o ngrok.zip
           sudo mv ngrok /usr/local/bin/
+          sudo chmod +x /usr/local/bin/ngrok
           ngrok version
-
-      - name: Auth Ngrok
+      - name: Authenticate Ngrok
         run: ngrok config add-authtoken ${{ secrets.NGROK_AUTHTOKEN }}
 
-      - name: Start Ngrok (10 minutos)
+      - name: Start Ngrok tunnel (mantener activo 15 minutos)
         id: ngrok
         run: |
-          echo "Iniciando túnel hacia FastAPI en el puerto 8080..."
           ngrok http 8080 --log=stdout > ngrok.log &
           sleep 8
+          echo "Consultando URL pública de Ngrok..."
           NGROK_URL=$(curl --silent http://127.0.0.1:4040/api/tunnels | grep -oP '"public_url":"\Khttps://[^"]+')
+          if [ -z "$NGROK_URL" ]; then
+            echo "❌ ERROR: No se pudo obtener la URL de Ngrok"
+            cat ngrok.log
+            exit 1
+          fi
+          echo "✅ Ngrok activo en: $NGROK_URL"
           echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
           echo "::notice title=URL pública::$NGROK_URL"
-          echo "Tu app está disponible temporalmente en: $NGROK_URL"
-          sleep 600  # Mantiene el túnel abierto 10 minutos
+          # Mantener el túnel abierto 15 minutos
+          sleep 900
           pkill ngrok
-
-      - name: Stop containers
+      - name: Stop Docker containers
         if: always()
         run: docker compose down
